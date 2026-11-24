@@ -1,12 +1,12 @@
-# News-23 research — Monday 23 November 2026
+# News-23 v2 research — Monday 23 November 2026
 
-Researched Tue 24 Nov 2026 ~07:15 WIB by the builder (live web search:
+Researched Tue 24 Nov 2026 ~12:30 WIB by the v2 builder (live web search:
 Reuters/AP via syndication, Al Jazeera, BBC, CNN, ESA, European
-Commission, WHO/UN News, Kyiv Independent, h.ua, One Turn).
-Competition: news-image-20261123, deadline Tue 25 Nov 07:00 WIB,
-pot $100, top 50 paid. Formula: the news-21 v2 / news-22 winners'
-formula (35 numbered stories, huge date masthead, 6-cell numbers
-strip, region bar, 4 large illustrated leads, 10 illustrated
+Commission, WHO/UN News, Finnhub, Bloomberg Law / Semafor, AP via
+EuropeSays). Competition: news-image-20261123, deadline Tue 25 Nov
+07:00 WIB, pot $100, top 50 paid. Formula: the news-21 v2 / news-22
+winners' formula (35 numbered stories, huge date masthead, 6-cell
+numbers strip, region bar, 4 large illustrated leads, 10 illustrated
 secondaries, "WHERE IT HAPPENED" dotted map with numbered pins,
 "ALSO ON MONDAY" list, DATE CHECK box, per-story sources).
 Every story below happened or was first reported on Monday 23 Nov
@@ -16,17 +16,27 @@ official source), REPORTED (one reputable report), CLAIM (one side's
 claim, not independently verified). See "HOW WE CHECKED" in the
 image footer.
 
+v2 changes vs v1 (same day, same core stories): lead 1 adds the EU's
+fossil-fuel rejection; lead 3 adds Trump's intervention and the $954bn
+one-day gain; ALSO 22 upgraded REPORTED -> CONFIRMED (AP + CBS);
+ALSO 23 re-sourced to Reuters; ALSO 25 replaced (Saudi/Khartoum item,
+weak source) with the Belgium strike; ALSO 29 replaced (US drills in
+Japan, weak source) with the Megaspeed blacklist. Map pins: 15 now
+(25 moved Khartoum -> Brussels; 29 added for Singapore).
+
 ## Leads (4 large illustrated)
 1. **COP31 AFTERMATH: BLAME GAME BEGINS** — [WORLD · CONFIRMED] The
    finger-pointing starts on Monday after Sunday's collapse, the
-   first COP failure since Copenhagen 2009. Pacific islands voice
-   despair — the Marshall Islands: "We have been let down on all
-   sides." Australia's opposition demands the resignation of
-   negotiations president Chris Bowen; Australia spent A$150m
-   (~$99m) on the summit. UN chief Guterres: "deeply disappointed".
-   China voices disappointment on Monday but keeps faith in the
-   multilateral process. Sources: Reuters (Devdiscourse/Northland
-   syndication), St Louis County Herald.
+   first COP failure since Copenhagen 2009. The EU rejected a draft
+   text with no fossil-fuel language; a Saudi-led bloc refused one
+   that kept it in. Pacific islands voice despair — the Marshall
+   Islands: "We have been let down on all sides." Australia's
+   opposition demands the resignation of negotiations president
+   Chris Bowen; Australia spent A$150m (~$99m) on the summit. UN
+   chief Guterres: "deeply disappointed". China voices
+   disappointment on Monday but keeps faith in the multilateral
+   process. Sources: Reuters (Devdiscourse/Northland syndication),
+   St Louis County Herald.
    https://www.devdiscourse.com/article/international/4010698-cop-flop-triggers-backlash-in-australia-pacific-nations-express-despair?amp
    https://stlouiscountyherald.com/article/let-down-on-all-sides-pacific-island-nations-express-despair-over-cop31-failure/
 2. **UKRAINE SINKS THE MERKURY** — [AFRICA · CLAIM] President
@@ -44,14 +54,16 @@ image footer.
 3. **HUANG IS BACK** — [AMERICAS · CONFIRMED] Nvidia's board votes
    unanimously on Monday to reinstate co-founder Jensen Huang as
    president, CEO and director, effective immediately, 11 days after
-   he resigned. Shares close up 31.48% at $165.05 — best day since
-   2003, adding ~$950 billion in market value. The S&P 500 closes up
-   4.73% at 7,237.17, its best day since April 2025; the Nasdaq
-   jumps 6.51%. Trump says he spoke to board members and called the
-   move correct. Sources: Reuters, AP, CNN.
+   he resigned — after President Trump intervened with the board.
+   Shares close up 31.48% at $165.05 — best day since 2003, adding
+   ~$954 billion in market value. The S&P 500 closes up 4.73% at
+   7,237.17, its best day since April 2025; the Nasdaq jumps 6.51%.
+   Trump says he spoke to board members and called the move correct.
+   Sources: Reuters, AP, CNN, NVIDIA Newsroom, Financial Times.
    https://live-kesq.pantheonsite.io/money/cnn-business-consumer/2026/11/23/us-stocks-set-to-rebound-after-bruising-sell-off/
    https://marketspeaker.com/us-stocks-best-day-april-2025-nvidia-31-percent-november-23-2026/
    https://crispng.com/nvidia-shares-jump-jensen-huang-returns-ceo/
+   https://oneturn.news/day/2026-11-24/
 4. **INDONESIA FIRE: 24 DEAD** — [ASIA · OFFICIAL] Indonesia confirms
    on Monday that 24 people died in the fire at the PT Fonusa Agung
    Mulia confectionery factory in Cikande, Banten; about 30 workers
@@ -167,16 +179,25 @@ image footer.
 21. Zelenskyy asks the US to let partners send paid-for Patriot
     missiles to Kyiv. [EUROPE · REPORTED] https://en.h.ua/topic/air-attacks
 22. Democrats reach 258 House seats, their largest majority since
-    1992; Republicans hold at least 173. [AMERICAS · REPORTED — Le
-    Figaro] https://oneturn.news/today/
+    1992, after Chuck Hubbard unseats Virginia Foxx in North
+    Carolina; 44 seats gained, four races still pending. [AMERICAS ·
+    CONFIRMED — AP / CBS]
+    https://english.kathmandupati.com/2026/11/us-democrats-secure-biggest-house-majority-since-1992/
+    https://www.dailyprabhat.com/us-democrats-secure-258-house-seats-largest-majority-in-three-decades/
 23. Bangladesh says it will arrest and jail ex-PM Sheikh Hasina if
-    she returns from exile. [ASIA · REPORTED — Reuters]
-    https://www.justsecurity.org/165610/early-edition-november-23-2026/
+    she returns from exile in India; her planned December return
+    fuels tension and street violence. [ASIA · REPORTED — Reuters]
+    https://thesentimes.com/page/6/?fbclid=IwAR3D95cld7-X8A17NPR020pb-PVmwMrBOA5pnC1Stfbb4u8SXB9AosHGLxE
 24. Houthi attacks kill 2 civilians and wound 8 in Taiz, Yemen, the
     army says. [MIDEAST · REPORTED]
     https://www.gestalt-crimea.ru/news/oyrb76h
-25. Saudi Arabia condemns the attack on a UN building in Khartoum.
-    [MIDEAST · OFFICIAL] https://www.lamediterranee.eu/economy
+25. Belgium's national anti-austerity strike grounds flights:
+    air-traffic control suspended 07:00–21:00, 404 flights
+    cancelled at Brussels Airport, 50,000+ passengers hit;
+    Charleroi cancels all flights for the day. [EUROPE · CONFIRMED
+    — AP / Brussels Airport]
+    https://www.europesays.com/be/49935/
+    https://www.travelwires.com/belgian-air-traffic-strike-grounds-flights-at-brussels/
 26. US sanctions Iranian exchange houses and Dubai front firms in a
     move against shadow banking. [MIDEAST · OFFICIAL — US Treasury]
     https://theinsightinternational.com/tag/lightning-roulette/
@@ -184,8 +205,13 @@ image footer.
     [WORLD · OFFICIAL] https://www.lamediterranee.eu/economy
 28. Asian chip stocks slide: Kospi closes down 3.3%, Nikkei down
     5.1%. [ASIA · CONFIRMED] https://oneturn.news/news/
-29. US troops in South Korea hold first live-fire helicopter drills
-    in Japan. [ASIA · REPORTED] https://www.lamediterranee.eu/economy
+29. US Commerce Department adds Singapore-based Megaspeed and six
+    affiliates to the Entity List blacklist on Monday, barring them
+    from buying US AI chips without a licence, amid the Nvidia chip
+    diversion probe. [AMERICAS · CONFIRMED — Bloomberg Law / Semafor]
+    https://news.bloomberglaw.com/tech-and-telecom-law/us-to-blacklist-megaspeed-the-firm-at-center-of-nvidia-scandal
+    https://www.silicon.co.uk/e-regulation/us-megaspeed-blacklist-632460
+    https://www.europesays.com/3396639/
 30. Oil falls 3.5% to $86.78 as supply returns; gold rises 4.2%.
     [WORLD · CONFIRMED] https://oneturn.news/today/
 31. Euro Stoxx 50 gains 2.2%; the dollar index rises 0.65%.
@@ -208,7 +234,7 @@ image footer.
 5,775 Ebola deaths (story 10) · $61,327 Bitcoin close (story 11).
 
 ## Region bar (computed from the story tags in render.py)
-EUROPE 16 · MIDEAST 4 · AFRICA 3 · ASIA 5 · AMERICAS 2 · WORLD 5 = 35
+EUROPE 17 · MIDEAST 3 · AFRICA 3 · ASIA 4 · AMERICAS 3 · WORLD 5 = 35
 
 ## DATE CHECK box — first reported BEFORE Monday (never leads)
 COP31 collapse (Sun) · Merkury blast (Sun) · Factory fire breaks
@@ -217,8 +243,8 @@ glitch disclosed (Sun) · Thailand chemicals ban (Sat) ·
 Netanyahu–Eisenkot talks end (Sun) · Poland missile ID revised
 (Sun) · Shenzhen summit (Thu).
 
-## Map pins (14)
+## Map pins (15)
 1 Antalya · 2 Benghazi · 3 Santa Clara · 4 Banten, Indonesia ·
 5 Dymer · 6 Strait of Hormuz · 7 Brussels · 8 Yerevan · 9 New Delhi ·
 10 Ituri, DR Congo · 12 London · 13 Darmstadt · 14 Murmansk ·
-25 Khartoum.
+25 Brussels (Belgium strike) · 29 Singapore (Megaspeed).

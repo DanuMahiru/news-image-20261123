@@ -1,4 +1,4 @@
-// The Monday Globe — make.fun news-image-20261123 entry.
+// The Monday Globe v2 — make.fun news-image-20261123 entry.
 //
 // The image is drawn at build time by render.py (Pillow) and shipped in
 // this repository as entry.png. This program only copies that file to the

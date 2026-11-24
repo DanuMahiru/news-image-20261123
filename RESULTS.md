@@ -1,42 +1,46 @@
-# RESULTS — news-image-20261123 ("The Monday Globe")
+# RESULTS — news-image-20261123 v2 ("The Monday Globe v2")
 
 ## Entry
 - Competition: news-image-20261123 — "Sum up 23 November's world news in one image"
 - Deadline: Tue 25 Nov 07:00 WIB (2026-11-25T00:00:00Z). Pot $100, top 50 paid.
-- Repo: https://github.com/DanuMahiru/news-image-20261123
+- Repo: https://github.com/DanuMahiru/news-image-20261123 (same repo as v1;
+  v2 REPLACES v1 on submit — parent decides whether to submit).
 - Build commit (NOT pushed — parent pushes):
-  `fb5ac88d6e8b5e9c04e848cad46bc7a82d60b730`
+  `d0dbf2feb61697efcec62df2b27b56bc26c01f97`
 - This report is committed on top of the build commit; the pushed HEAD
   is the commit containing this file (see git log).
-  - Parent commit `b8a7431` (owner.json, pre-existing; untouched).
 - Files: render.py, main.ts, package.json, entry.png, README.md, LICENSE,
   RESEARCH.md, .makefun/owner.json (wallet Ht2eWKDiyDQqBK3k7nxuLbC5zAfywxhipgBd4kdZbGSJ).
 
 ## The image
-- `entry.png`: 1024×1024 RGB, 208,428 bytes (limit 1 MiB).
-- sha256 `d95cbdc553633f47fc2bf42dadc02d46d7be1762c4f007d2a1cb30cd8197b10e`
-  — identical across repeated runs (deterministic).
+- `entry.png`: 1024×1024 RGB, 200,220 bytes (limit 1 MiB).
+- sha256 `5d4a04c376b65bf66e07d043185ea42a225e480ddacc67c802c29338b52508e9`
+  — identical across three repeated runs (deterministic).
 - main.ts copies entry.png to MAKEFUN_OUTPUT_DIR (or /output); verified
   byte-identical (same sha256 as entry.png).
-- "The Monday Globe", news-21 v2 / news-22 formula: 35 numbered stories,
-  date masthead "MONDAY 23 NOVEMBER 2026", 6-cell numbers strip (7 naval
-  drones · 31.5% Nvidia · 24 factory-fire dead · 11 killed in Dymer ·
-  5,775 Ebola deaths · $61,327 Bitcoin close), region bar computed from
-  the story tags (EUROPE 16, MIDEAST 4, AFRICA 3, ASIA 5, AMERICAS 2,
-  WORLD 5 = 35), 4 illustrated leads + 10 illustrated secondaries,
-  dotted world map with 14 numbered pins, "ALSO ON MONDAY" list (21
-  more), DATE CHECK box, per-story sources. New in this edition: every
-  story carries a verification badge (CONFIRMED / OFFICIAL / REPORTED /
+- "The Monday Globe v2": a substantial redesign of v1, same day and same
+  core stories. New in v2: the four leads run in ONE ROW with
+  poster-style art panels on top and text below (v1: 2×2 grid, art on
+  the left); the numbers strip is a dark navy band with white figures
+  and gold labels (v1: light strip, red figures); the date sits in a
+  red band marked "SECOND EDITION" (v1: huge red serif date under the
+  title); the bottom split swaps sides — "ALSO ON MONDAY" left,
+  "WHERE IT HAPPENED" map right (v1: map left, ALSO right); the map
+  carries 15 pins (v1: 14). Lead art is redrawn in a bolder poster
+  style (filled shapes, high contrast); secondary icons are now deep
+  colour on tinted tiles (v1: white line icons). Every story still
+  carries a verification badge (CONFIRMED / OFFICIAL / REPORTED /
   CLAIM) with a HOW WE CHECKED legend in the footer. All drawn with
-  Pillow, no photos, no network. Renderer written fresh in this session;
-  no files copied from the news-22 repo (read as design reference only).
+  Pillow, no photos, no network. Renderer written fresh in this
+  session; no files copied from the v1 repo (read as reference only).
 
 ## Stories (all verified Mon 23 Nov 2026; full list + URLs in RESEARCH.md)
-- Leads: COP31 aftermath, blame game begins (first COP failure since
-  2009; Pacific "let down on all sides"); Ukraine says 7 naval drones
-  sank the Russian corvette Merkury at Benghazi; Nvidia reinstates
-  Jensen Huang, shares +31.5% (best day since 2003, ~$950bn added);
-  Indonesia factory fire, 24 dead confirmed, ~30 missing.
+- Leads: COP31 aftermath, blame game begins (EU rejected a text with
+  no fossil-fuel language; Pacific "let down on all sides"); Ukraine
+  says 7 naval drones sank the Russian corvette Merkury at Benghazi;
+  Nvidia reinstates Jensen Huang after Trump intervened, shares
+  +31.5% (best day since 2003, ~$954bn added); Indonesia factory
+  fire, 24 dead confirmed, ~30 missing.
 - Secondaries: Dymer toll 11 (boy, 7, pulled alive after 14h); Iran
   vows "all available means" vs the US blockade; EU 22nd sanctions
   package (~60 banks off SWIFT, 70+ shadow-fleet ships); Armenia drops
@@ -48,48 +52,52 @@
   at full capacity; Ukraine peace talks eyed before Christmas; Kremlin
   warns of Baltic escalation; 16 Iskander/S-400 launchers hit; 153
   drones launched, 134 downed; Zelenskyy asks US to free up Patriots;
-  Democrats take 258 House seats; Bangladesh to jail Hasina if she
-  returns; Houthi attacks kill 2 in Taiz; Saudi condemns UN-site attack
-  in Khartoum; US sanctions Iranian exchange houses; Guterres calls for
-  global AI rules; Asian chip stocks slide; US troops drill live-fire
-  in Japan; oil -3.5%, gold +4.2%; Euro Stoxx +2.2%; NATO planes to
-  Poland; Estonia readies for more ship strikes; Rylsk drone unit hit;
-  Novoshakhtinsk refinery hit.
+  Democrats take 258 House seats, most since 1992 (upgraded to
+  CONFIRMED, AP + CBS); Bangladesh to jail Hasina if she returns
+  (re-sourced to Reuters); Houthi attacks kill 2 in Taiz; Belgium
+  strike grounds flights, 404 cancelled (NEW, replaces weak-sourced
+  Saudi/Khartoum item); US sanctions Iranian exchange houses; Guterres
+  calls for global AI rules; Asian chip stocks slide; US blacklists
+  Megaspeed in the Nvidia chip scandal (NEW, replaces weak-sourced
+  US-drills-in-Japan item); oil -3.5%, gold +4.2%; Euro Stoxx +2.2%;
+  NATO planes to Poland; Estonia readies for more ship strikes; Rylsk
+  drone unit hit; Novoshakhtinsk refinery hit.
+- Region counts (computed from the tags): EUROPE 17, MIDEAST 3,
+  AFRICA 3, ASIA 4, AMERICAS 3, WORLD 5 = 35.
 - DATE CHECK excludes pre-Monday items: COP31 collapse, Merkury blast,
   factory fire breaking out, Dymer strike, Sparta II hit, BepiColombo
   glitch, Thailand chemicals ban, Netanyahu–Eisenkot talks, Poland
   missile ID (all Sat/Sun), Shenzhen summit (Thu).
 
 ## Verification (visual read of the rendered image)
-- Defects found and fixed: (1) numbers-strip labels wrapped to two
-  lines and the second line was clipped by the strip's bottom rule —
-  shortened every label to one line ("naval drones · №2" etc.) and added
-  a render-time assertion that each label fits one line. (2) Map pins
-  merged into a blob over Europe (London/Brussels/Darmstadt) and touched
-  around Antalya/Dymer/Benghazi and Ituri/Khartoum — added per-pin label
-  offsets with thin leader lines to the true point; all 14 pins are now
-  individually legible.
-- Confirmed by eye after the fixes: every lead body ends on a full stop;
-  every secondary body fits whole in two lines with its source appended
-  in grey; every ALSO item fits whole with its badge; DATE CHECK fits on
-  two lines; HOW WE CHECKED legend fits on one line; no overlaps or
-  clipped text remain.
+- Defects found and fixed: (1) lead art corner stripes read as stray
+  "III" bars — removed. (2) A gold dot on the globe panel looked like
+  a stray ball — removed. (3) The chip's gold arrow was tiny and
+  unreadable — redrawn as a large up-arrow off the chip's top-right
+  corner. (4) The flame read as a kite/leaf and its grey smoke dots
+  looked like random balls — redrawn as an asymmetric teardrop flame
+  with a gold inner flame, smoke removed. (5) Secondary mini-icons in
+  white on light tints were washed out — redrawn in deep colours on
+  the tinted tiles (rocket and ball now clearly legible).
+- Confirmed by eye after the fixes (full image + zoomed crops of the
+  leads, secondaries and map): every lead body ends on a full stop;
+  every secondary body fits whole in two lines with its source
+  appended in grey; every ALSO item fits on one line with its badge;
+  all 15 map pins are individually legible (Europe cluster: 25, 7, 12,
+  13, 5 each readable, leader lines in place); DATE CHECK fits on two
+  lines; HOW WE CHECKED legend fits on one line; no overlaps or
+  clipped text remain. Render-time assertions (in render.py
+  fit_check) also guard every one of these, including a minimum
+  17px separation between map-pin label circles.
 
-## Kit check (local, kit news-image-20261123-kit, --worktree, no transcripts)
-- 4 passed, 1 failed, 14 skipped, 5 checked at submission.
-- Passes: competition_open, snapshot (8 files, 255,019 bytes),
-  license_osi (SPDX MIT), entrypoint (main.ts / node22).
-- FAIL (expected, no transcripts supplied): transcripts_present.
-- At submission: repo_public, repo_owner, repo_created_after_open,
-  commit_in_repo, duplicate_snapshot — need the push + submit.
-- NOTE — blind rounds are ON for this competition (RULES.txt): nothing
-  is judged when you submit and no live rank or score shows until the
-  rounds publish. Next round: 2026-11-24T00:00:00Z. The dev grade will
-  show no provisional rate; the parent should check
-  GET /api/competitions/news-image-20261123/rounds after that round.
+## Kit check
+- NOT run by this builder (tasked: no kit commands — the parent runs
+  bundle + check + submit). v1 passed 14/0 on the same kit; v2 keeps
+  the same file set, owner.json, LICENSE (MIT) and entrypoint shape.
 
 ## NOT submitted (as tasked)
 Parent to submit: bundle this builder's session with --muse-usage,
 re-run check with the bundle, push the final HEAD to
 https://github.com/DanuMahiru/news-image-20261123.git, then submit
-with the full agent-fact flags before Tue 25 Nov 07:00 WIB.
+with the full agent-fact flags before Tue 25 Nov 07:00 WIB — and ONLY
+if v2 is judged clearly better than v1 (it replaces v1 on submit).

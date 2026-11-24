@@ -1,18 +1,24 @@
 #!/usr/bin/env python3
-"""The Monday Globe — draws entry.png, a one-page newspaper front that
+"""The Monday Globe v2 — draws entry.png, a one-page newspaper front that
 sums up the world news of Monday 23 November 2026.
 
-Deterministic: no network, no clock, no randomness. Pillow only.
+Written fresh for v2 (new layout, new illustration style). Deterministic:
+no network, no clock, no randomness. Pillow only.
 Run: python3 render.py  ->  writes entry.png (1024x1024) next to this file.
 
-Layout (the proven news-21 v2 / news-22 formula): huge date masthead,
-6-cell numbers strip, region bar, 4 large illustrated leads, 10
-illustrated secondaries, "WHERE IT HAPPENED" dotted map with numbered
-pins, "ALSO ON MONDAY" list, DATE CHECK box. New in this edition:
-every story carries a verification badge (CONFIRMED / OFFICIAL /
-REPORTED / CLAIM) with a HOW WE CHECKED legend in the footer, and
-the region bar counts are computed from the story tags in code.
+v2 layout (a substantial redesign of v1's 2x2 grid):
+  red rule + centred serif masthead + red date band ("SECOND EDITION")
+  -> dark navy 6-cell numbers strip -> segmented region bar
+  -> FOUR LEADS IN ONE ROW, poster-style art panels on top, text below
+  -> "MORE FROM MONDAY": 10 secondaries in two columns of five, each
+     with a tinted icon tile and a numbered circle
+  -> bottom split, sides SWAPPED vs v1: "ALSO ON MONDAY" list on the
+     LEFT, "WHERE IT HAPPENED" dotted map on the RIGHT (15 pins now)
+  -> DATE CHECK box -> HOW WE CHECKED footer legend.
+Every story carries a verification badge (CONFIRMED / OFFICIAL /
+REPORTED / CLAIM); region counts are computed from the story tags.
 """
+import math
 import os
 from collections import Counter
 
@@ -22,14 +28,23 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "entry.png")
 
 W, H = 1024, 1024
-PAPER = (246, 241, 229)
-INK = (25, 23, 19)
-RED = (164, 31, 36)
-BLUE = (29, 78, 122)
-TEAL = (15, 118, 110)
-OCHRE = (178, 122, 26)
+PAPER = (247, 242, 230)
+INK = (22, 20, 18)
+NAVY = (18, 38, 66)
+RED = (178, 34, 34)
+TEAL = (13, 110, 100)
+OCHRE = (176, 120, 24)
+BLUE = (36, 84, 130)
+GOLD = (212, 168, 60)
 GREY = (105, 100, 88)
 PANEL = (255, 253, 247)
+DOT = (148, 143, 126)
+TINT = {
+    "blue": (214, 228, 240),
+    "red": (244, 214, 210),
+    "teal": (205, 232, 226),
+    "ochre": (245, 228, 196),
+}
 
 SERIF = "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf"
 SANS = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
@@ -69,32 +84,40 @@ def wrap(draw, text, fnt, width):
 #         OFFICIAL  = a named official source
 #         REPORTED  = one reputable report
 #         CLAIM     = one side's claim, not independently verified
+# v2 changes vs v1: lead 1 and 3 bodies tightened with new Monday detail
+# (EU fossil-fuel rejection; Trump intervened, $954bn added); ALSO 22
+# upgraded REPORTED -> CONFIRMED (AP + CBS), 23 sourced to Reuters,
+# 25 replaced (Saudi/Khartoum, weak source) with the Belgium strike,
+# 29 replaced (US drills in Japan, weak source) with the Megaspeed
+# blacklist. Region counts move: EUROPE 17, MIDEAST 3, AFRICA 3,
+# ASIA 4, AMERICAS 3, WORLD 5 = 35.
 LEADS = [
     dict(n=1, tag="CLIMATE", region="WORLD", badge="CONFIRMED",
          title="COP31 AFTERMATH",
          body="The blame game starts a day after the talks collapse \u2014 "
-              "the first COP failure since 2009. Pacific islands say they "
-              "were \u201clet down on all sides\u201d; Australia\u2019s "
-              "opposition wants the talks chief sacked.",
-         src="Reuters", kind="globe", tint=BLUE),
+              "the first COP failure since 2009. The EU rejected a text "
+              "with no fossil-fuel language; Pacific islands say they "
+              "were \u201clet down on all sides\u201d.",
+         src="Reuters", kind="globe", tint="blue", deep=NAVY),
     dict(n=2, tag="LIBYA", region="AFRICA", badge="CLAIM",
          title="UKRAINE SINKS THE MERKURY",
          body="Zelenskyy says seven Ukrainian naval drones sank the "
               "Russian corvette at Benghazi and hit the cargo ship "
               "Angara. A Ka-27 helicopter aboard was also destroyed.",
-         src="AP / SBU", kind="ship", tint=RED),
+         src="AP / SBU", kind="ship", tint="red", deep=RED),
     dict(n=3, tag="MARKETS", region="AMERICAS", badge="CONFIRMED",
          title="HUANG IS BACK",
          body="Nvidia\u2019s board votes unanimously to bring back "
-              "co-founder Jensen Huang, 11 days after he quit. Shares "
-              "close up 31.5% \u2014 their best day since 2003.",
-         src="Reuters / AP / CNN", kind="coin", tint=TEAL),
+              "co-founder Jensen Huang, 11 days after he quit \u2014 "
+              "after Trump intervened. Shares close up 31.5% \u2014 their "
+              "best day since 2003 \u2014 adding $954bn.",
+         src="Reuters / AP / CNN", kind="chip", tint="teal", deep=TEAL),
     dict(n=4, tag="INDONESIA", region="ASIA", badge="OFFICIAL",
          title="INDONESIA FIRE: 24 DEAD",
          body="Indonesia confirms 24 dead in the Cikande candy-factory "
               "fire; about 30 workers are still missing. Rescuers "
               "search unstable wreckage; DNA tests will identify victims.",
-         src="Reuters", kind="flame", tint=OCHRE),
+         src="Reuters", kind="flame", tint="ochre", deep=OCHRE),
 ]
 
 SECONDARIES = [
@@ -159,14 +182,14 @@ ALSO = [
     (19, "Ukraine hit 16 Iskander and S-400 launchers", "EUROPE", "CLAIM"),
     (20, "Russia launches 153 drones; Ukraine downs 134", "EUROPE", "OFFICIAL"),
     (21, "Zelenskyy asks US to free up paid-for Patriots", "EUROPE", "REPORTED"),
-    (22, "Democrats win 258 House seats, most since 1992", "AMERICAS", "REPORTED"),
+    (22, "Democrats win 258 House seats, most since 1992", "AMERICAS", "CONFIRMED"),
     (23, "Bangladesh will jail ex-PM Hasina if she returns", "ASIA", "REPORTED"),
     (24, "Houthi attacks kill 2, wound 8 in Taiz, Yemen", "MIDEAST", "REPORTED"),
-    (25, "Saudi Arabia condemns attack on UN site in Khartoum", "MIDEAST", "OFFICIAL"),
+    (25, "Belgium strike grounds flights; 404 cancelled", "EUROPE", "CONFIRMED"),
     (26, "US sanctions Iranian exchange houses, Dubai firms", "MIDEAST", "OFFICIAL"),
     (27, "Guterres calls for global AI rules within a year", "WORLD", "OFFICIAL"),
     (28, "Asian chip stocks slide: Kospi -3.3%, Nikkei -5.1%", "ASIA", "CONFIRMED"),
-    (29, "US troops in South Korea drill live-fire in Japan", "ASIA", "REPORTED"),
+    (29, "US blacklists Megaspeed in Nvidia chip scandal", "AMERICAS", "CONFIRMED"),
     (30, "Oil falls 3.5% to $86.78; gold rises 4.2%", "WORLD", "CONFIRMED"),
     (31, "Euro Stoxx 50 gains 2.2%; dollar index up 0.65%", "EUROPE", "CONFIRMED"),
     (32, "NATO sends early-warning planes to Poland", "EUROPE", "REPORTED"),
@@ -231,107 +254,161 @@ MAP_ROWS = [
 ]
 
 PINS = [  # (story no, lon, lat, dx, dy) — dx/dy nudge the label circle
-    # off the true point (thin leader line) where pins would merge
-    (1, 30.7, 36.9, 0, 8), (2, 20.1, 32.1, -12, 0),
+    # off the true point (thin leader line) where pins would merge.
+    # v2: pin 25 moves Khartoum -> Brussels (Belgium strike, story 25);
+    # pin 29 added for Singapore (Megaspeed blacklist).
+    (1, 30.7, 36.9, 0, 10), (2, 20.1, 32.1, -14, 0),
     (3, -121.95, 37.35, 0, 0), (4, 106.2, -6.1, 0, 0),
     (5, 30.3, 50.8, 0, 0), (6, 56.3, 26.5, 0, 0),
-    (7, 4.35, 50.85, -18, 16), (8, 44.5, 40.2, 0, 0),
+    (7, 4.35, 50.85, -20, 14), (8, 44.5, 40.2, 0, 0),
     (9, 77.2, 28.6, 0, 0), (10, 30.0, 1.5, 0, 0),
-    (12, -0.13, 51.5, 0, 0), (13, 8.65, 49.87, 20, -14),
-    (14, 33.07, 68.97, 0, 0), (25, 32.5, 15.6, 12, 0),
+    (12, -0.13, 51.5, 0, 0), (13, 8.65, 49.87, 26, -18),
+    (14, 33.07, 68.97, 0, -16), (25, 4.35, 50.85, -30, -8),
+    (29, 103.85, 1.35, 10, -12),
 ]
 
 
-def draw_icon(d, kind, cx, cy, s, ink, accent):
-    """Small pictogram centred at (cx, cy), size s, drawn from shapes."""
-    import math
+# ------------------------------------------------------------- illustration
+def draw_lead_art(d, kind, x, y, w, h, tint, deep):
+    """Poster-style art panel: flat tint background, one big bold motif
+    in the deep colour + white + a gold accent. Very different from v1's
+    thin line icons: filled shapes, high contrast, motif fills the panel.
+    """
+    d.rectangle([x, y, x + w, y + h], fill=TINT[tint])
+    cx, cy = x + w // 2, y + h // 2 + 4
     if kind == "globe":
-        d.ellipse([cx - s, cy - s, cx + s, cy + s], outline=ink, width=3)
-        d.ellipse([cx - s * 0.45, cy - s, cx + s * 0.45, cy + s],
-                  outline=ink, width=2)
-        d.line([cx - s, cy, cx + s, cy], fill=ink, width=2)
-        d.line([cx - s * 0.8, cy + s * 0.8, cx + s * 0.8, cy - s * 0.8],
-               fill=accent, width=4)
-    elif kind == "sea":
-        for yy in (-0.5, 0.0, 0.5):
-            y = cy + yy * s
-            d.arc([cx - s, y - s * 0.35, cx - s * 0.2, y + s * 0.35],
-                  180, 360, fill=ink, width=3)
-            d.arc([cx - s * 0.2, y - s * 0.35, cx + s * 0.6, y + s * 0.35],
-                  180, 360, fill=ink, width=3)
-        d.polygon([(cx - s * 0.9, cy - s * 0.9), (cx + s * 0.9, cy - s * 0.9),
-                   (cx + s * 0.5, cy - s * 0.45), (cx - s * 0.5, cy - s * 0.45)],
-                  fill=ink)
-        d.rectangle([cx - s * 0.08, cy - s * 1.15, cx + s * 0.08, cy - s * 0.85],
-                    fill=ink)
+        r = 40
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(255, 255, 255),
+                  outline=deep, width=4)
+        d.ellipse([cx - r * 0.45, cy - r, cx + r * 0.45, cy + r],
+                  outline=deep, width=3)
+        d.line([cx - r, cy, cx + r, cy], fill=deep, width=3)
+        d.line([cx - r + 6, cy + r - 6, cx + r - 6, cy - r + 6],
+               fill=RED, width=9)
     elif kind == "ship":
-        d.polygon([(cx - s, cy + s * 0.3), (cx + s, cy + s * 0.3),
-                   (cx + s * 0.7, cy + s * 0.8), (cx - s * 0.7, cy + s * 0.8)],
-                  fill=ink)
-        d.rectangle([cx - s * 0.5, cy - s * 0.3, cx + s * 0.3, cy + s * 0.3],
-                    fill=ink)
-        d.rectangle([cx - s * 0.1, cy - s * 0.9, cx + s * 0.1, cy - s * 0.3],
-                    fill=ink)
-        for a in (0, 60, 120, 180, 240, 300):
-            r1, r2 = s * 0.35, s * 0.75
-            x1 = cx + s * 0.55 + r1 * math.cos(math.radians(a))
-            y1 = cy - s * 0.75 + r1 * math.sin(math.radians(a))
-            x2 = cx + s * 0.55 + r2 * math.cos(math.radians(a))
-            y2 = cy - s * 0.75 + r2 * math.sin(math.radians(a))
-            d.line([x1, y1, x2, y2], fill=accent, width=3)
-        d.ellipse([cx + s * 0.35, cy - s * 0.95, cx + s * 0.75, cy - s * 0.55],
-                  fill=accent)
+        d.polygon([(cx - 52, cy + 8), (cx + 52, cy + 8),
+                   (cx + 38, cy + 34), (cx - 38, cy + 34)], fill=deep)
+        d.rectangle([cx - 26, cy - 14, cx + 14, cy + 8], fill=deep)
+        d.rectangle([cx - 4, cy - 38, cx + 4, cy - 14], fill=deep)
+        d.rectangle([cx - 26, cy - 22, cx + 14, cy - 14], fill=(255, 255, 255))
+        pts = []
+        for i in range(12):
+            r = 22 if i % 2 == 0 else 10
+            a = math.radians(i * 30)
+            pts.append((cx + 34 + r * math.cos(a), cy - 30 + r * math.sin(a)))
+        d.polygon(pts, fill=GOLD)
+        d.ellipse([cx + 26, cy - 38, cx + 42, cy - 22], fill=(255, 220, 120))
+        for yy in (cy + 42, cy + 48):
+            d.arc([cx - 52, yy - 8, cx - 18, yy + 8], 180, 360,
+                  fill=(255, 255, 255), width=3)
+            d.arc([cx - 18, yy - 8, cx + 16, yy + 8], 180, 360,
+                  fill=(255, 255, 255), width=3)
+    elif kind == "chip":
+        d.rounded_rectangle([cx - 36, cy - 36, cx + 36, cy + 36], radius=8,
+                            fill=deep)
+        for px in (-36, 36):
+            for py in (-18, 0, 18):
+                d.rectangle([cx + px - 8, cy + py - 3,
+                             cx + px + 8, cy + py + 3], fill=deep)
+        f = font(SANS_B, 40)
+        t = "N"
+        tw = d.textlength(t, font=f)
+        d.text((cx - tw / 2, cy - 26), t, font=f, fill=(255, 255, 255))
+        # big gold up-arrow rising off the chip's top-right corner
+        d.rectangle([cx + 40, cy - 18, cx + 48, cy + 8], fill=GOLD)
+        d.polygon([(cx + 32, cy - 14), (cx + 56, cy - 14), (cx + 44, cy - 34)],
+                  fill=GOLD)
     elif kind == "flame":
-        d.polygon([(cx, cy - s), (cx + s * 0.75, cy + s * 0.1),
-                   (cx + s * 0.4, cy + s * 0.7), (cx, cy + s * 0.45),
-                   (cx - s * 0.4, cy + s * 0.7), (cx - s * 0.75, cy + s * 0.1)],
-                  fill=accent)
-        d.polygon([(cx, cy - s * 0.35), (cx + s * 0.35, cy + s * 0.2),
-                   (cx, cy + s * 0.6), (cx - s * 0.35, cy + s * 0.2)],
-                  fill=(255, 220, 120))
+        # asymmetric teardrop flame, leaning tip, wide base
+        d.polygon([(cx - 6, cy - 46), (cx + 30, cy - 6), (cx + 32, cy + 12),
+                   (cx + 20, cy + 34), (cx + 2, cy + 30),
+                   (cx - 14, cy + 34), (cx - 30, cy + 2),
+                   (cx - 24, cy - 20)], fill=deep)
+        d.polygon([(cx + 2, cy - 16), (cx + 16, cy + 8),
+                   (cx + 4, cy + 28), (cx - 12, cy + 8)], fill=(255, 220, 120))
+
+
+def draw_mini(d, kind, x, y, s, tint, deep):
+    """Small filled pictogram (deep colour on a tinted tile) for secondaries."""
+    d.rounded_rectangle([x, y, x + s, y + s], radius=5, fill=TINT[tint])
+    cx, cy = x + s // 2, y + s // 2
+    w = deep
+    if kind == "globe":
+        r = s * 0.32
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=w, width=3)
+        d.ellipse([cx - r * 0.45, cy - r, cx + r * 0.45, cy + r],
+                  outline=w, width=2)
+        d.line([cx - r, cy, cx + r, cy], fill=w, width=2)
+    elif kind == "sea":
+        for yy in (-0.2, 0.15):
+            yyv = cy + yy * s
+            d.arc([cx - s * 0.32, yyv - s * 0.12, cx - s * 0.02, yyv + s * 0.12],
+                  180, 360, fill=w, width=3)
+            d.arc([cx - s * 0.02, yyv - s * 0.12, cx + s * 0.32, yyv + s * 0.12],
+                  180, 360, fill=w, width=3)
+        d.polygon([(cx - s * 0.28, cy - s * 0.12), (cx + s * 0.28, cy - s * 0.12),
+                   (cx + s * 0.16, cy - s * 0.3), (cx - s * 0.16, cy - s * 0.3)],
+                  fill=w)
     elif kind == "blast":
         pts = []
         for i in range(12):
-            r = s if i % 2 == 0 else s * 0.45
+            r = s * 0.36 if i % 2 == 0 else s * 0.17
             a = math.radians(i * 30)
             pts.append((cx + r * math.cos(a), cy + r * math.sin(a)))
-        d.polygon(pts, fill=accent)
-        d.ellipse([cx - s * 0.3, cy - s * 0.3, cx + s * 0.3, cy + s * 0.3],
-                  fill=(255, 220, 120))
-    elif kind == "rocket":
-        d.polygon([(cx, cy - s), (cx + s * 0.45, cy - s * 0.1),
-                   (cx + s * 0.45, cy + s * 0.6), (cx, cy + s),
-                   (cx - s * 0.45, cy + s * 0.6), (cx - s * 0.45, cy - s * 0.1)],
-                  fill=ink)
-        d.ellipse([cx - s * 0.18, cy - s * 0.55, cx + s * 0.18, cy - s * 0.15],
-                  fill=PAPER)
-    elif kind == "cross":
-        d.rectangle([cx - s * 0.25, cy - s, cx + s * 0.25, cy + s], fill=accent)
-        d.rectangle([cx - s, cy - s * 0.25, cx + s, cy + s * 0.25], fill=accent)
-    elif kind == "coin":
-        d.ellipse([cx - s, cy - s, cx + s, cy + s], outline=ink, width=3)
-        d.ellipse([cx - s * 0.55, cy - s * 0.55, cx + s * 0.55, cy + s * 0.55],
-                  outline=ink, width=2)
-        d.text((cx - 4, cy - 9), "B", font=font(SANS_B, 16), fill=ink)
-    elif kind == "ball":
-        d.ellipse([cx - s, cy - s, cx + s, cy + s], outline=ink, width=3)
-        d.polygon([(cx, cy - s * 0.45), (cx + s * 0.43, cy - s * 0.14),
-                   (cx + s * 0.26, cy + s * 0.36), (cx - s * 0.26, cy + s * 0.36),
-                   (cx - s * 0.43, cy - s * 0.14)], fill=ink)
+        d.polygon(pts, fill=w)
+        d.ellipse([cx - 3, cy - 3, cx + 3, cy + 3], fill=GOLD)
     elif kind == "flag":
-        d.rectangle([cx - s * 0.15, cy - s, cx - s * 0.02, cy + s], fill=ink)
-        d.polygon([(cx, cy - s), (cx + s, cy - s * 0.7),
-                   (cx + s, cy - s * 0.3), (cx, cy - s * 0.55)], fill=accent)
+        d.rectangle([cx - s * 0.3, cy - s * 0.34, cx - s * 0.24, cy + s * 0.34],
+                    fill=w)
+        d.polygon([(cx - s * 0.24, cy - s * 0.34), (cx + s * 0.32, cy - s * 0.22),
+                   (cx + s * 0.32, cy - s * 0.08), (cx - s * 0.24, cy - s * 0.14)],
+                  fill=w)
+    elif kind == "cross":
+        d.rectangle([cx - s * 0.09, cy - s * 0.32, cx + s * 0.09, cy + s * 0.32],
+                    fill=w)
+        d.rectangle([cx - s * 0.32, cy - s * 0.09, cx + s * 0.32, cy + s * 0.09],
+                    fill=w)
+    elif kind == "coin":
+        r = s * 0.32
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=w, width=3)
+        f = font(SANS_B, 15)
+        d.text((cx - 5, cy - 10), "B", font=f, fill=w)
+    elif kind == "ball":
+        r = s * 0.32
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=w, width=3)
+        d.polygon([(cx, cy - r * 0.45), (cx + r * 0.43, cy - r * 0.14),
+                   (cx + r * 0.26, cy + r * 0.36), (cx - r * 0.26, cy + r * 0.36),
+                   (cx - r * 0.43, cy - r * 0.14)], fill=w)
+    elif kind == "rocket":
+        d.polygon([(cx, cy - s * 0.36), (cx + s * 0.16, cy - s * 0.04),
+                   (cx + s * 0.16, cy + s * 0.22), (cx, cy + s * 0.36),
+                   (cx - s * 0.16, cy + s * 0.22), (cx - s * 0.16, cy - s * 0.04)],
+                  fill=w)
+        d.ellipse([cx - s * 0.07, cy - s * 0.2, cx + s * 0.07, cy - s * 0.05],
+                  fill=PAPER)
 
 
-def badge_circle(d, x, y, n, diam=26):
+# tile tint per secondary kind (matches the lead palette family)
+KIND_TINT = {"blast": "red", "sea": "blue", "flag": "red", "globe": "blue",
+             "cross": "red", "coin": "teal", "ball": "blue", "rocket": "blue"}
+KIND_DEEP = {"blast": RED, "sea": BLUE, "flag": RED, "globe": NAVY,
+             "cross": RED, "coin": TEAL, "ball": BLUE, "rocket": NAVY}
+
+
+def num_circle(d, x, y, n, diam=30):
     """Red numbered circle."""
     d.ellipse([x, y, x + diam, y + diam], fill=RED)
-    f = font(SANS_B, 15 if n < 10 else 13)
+    f = font(SANS_B, 16 if n < 10 else 14)
     t = str(n)
     tw = d.textlength(t, font=f)
-    d.text((x + (diam - tw) / 2, y + (diam - 15) / 2 - 1), t, font=f,
+    d.text((x + (diam - tw) / 2, y + (diam - 16) / 2 - 1), t, font=f,
            fill=(255, 255, 255))
+
+
+def pill_width(d, label):
+    """Width a verification pill would take, without drawing it."""
+    f = font(SANS_B, 9)
+    return d.textlength(label, font=f) + 14
 
 
 def badge_pill(d, x, y, label, fill):
@@ -346,46 +423,58 @@ def badge_pill(d, x, y, label, fill):
 
 def fit_check(d):
     """Fail loudly if any text would be cut — nothing is truncated."""
-    f_lead_b = font(SANS, 12)
-    f_sec_b = font(SANS, 11)
-    lead_w = (W - 44 - 6) / 2
-    tw_lead = lead_w - 128 - 20
+    # leads: title <= 2 lines, body <= 5 lines, source fits on one line
     for st in LEADS:
-        lines = wrap(d, st["body"], f_lead_b, tw_lead)
-        assert len(lines) <= 4, f"lead {st['n']} body needs {len(lines)} lines"
-        assert len(wrap(d, st["title"], font(SANS_B, 17), tw_lead)) <= 1, \
+        assert len(wrap(d, st["title"], font(SANS_B, 15), 224)) <= 2, \
             f"lead {st['n']} title wraps"
-    sec_w = (W - 44 - 6) / 2
-    tw_sec = sec_w - 86
+        lines = wrap(d, st["body"], font(SANS, 10), 224)
+        assert len(lines) <= 5, f"lead {st['n']} body needs {len(lines)} lines"
+        assert d.textlength("Source: " + st["src"], font=font(SANS, 10)) <= 224, \
+            f"lead {st['n']} source too long"
+    # secondaries: title+tag fits beside the badge pill, body <= 2 lines
     for st in SECONDARIES:
-        title = f"{st['n']}. {st['title']} \u2014 {st['tag']} \u00b7 {st['badge']}"
-        assert d.textlength(title, font=font(SANS_B, 13)) <= tw_sec, \
+        title = f"{st['n']}. {st['title']} \u2014 {st['tag']}"
+        pill_w = d.textlength(st["badge"], font=font(SANS_B, 9)) + 14
+        assert d.textlength(title, font=font(SANS_B, 12)) + pill_w + 10 <= 432, \
             f"secondary {st['n']} title too long"
-        # body must fit in 2 lines with " \u2014 src" on the last line
         suffix = " \u2014 " + st["src"]
-        lines = wrap(d, st["body"], f_sec_b, tw_sec)
+        lines = wrap(d, st["body"], font(SANS, 11), 432)
         assert len(lines) <= 2, f"secondary {st['n']} body needs {len(lines)} lines"
-        assert d.textlength(lines[-1] + suffix, font=f_sec_b) <= tw_sec, \
+        assert d.textlength(lines[-1] + suffix, font=font(SANS, 11)) <= 432, \
             f"secondary {st['n']} body+src too long"
-    f_also = font(SANS, 10)
-    f_also_b = font(SANS_B, 9)
+    # ALSO list: one line each in the left bottom column
     for n, item, _r, badge in ALSO:
-        bw = d.textlength(" \u00b7 " + badge, font=f_also_b)
-        line = f"{n}. {item}"
-        assert d.textlength(line, font=f_also) + bw <= 348, \
-            f"ALSO {n} too long: {line}"
-    dc = wrap(d, DATE_CHECK, font(SANS_B, 11), W - 44 - 20)
-    assert len(dc) <= 2, f"DATE CHECK needs {len(dc)} lines"
-    assert d.textlength(LEGEND, font=font(SANS, 9)) <= W - 44, "legend too long"
+        line = f"{n}. {item} \u00b7 {badge}"
+        w = (d.textlength(f"{n}. {item}", font=font(SANS, 10))
+             + d.textlength(" \u00b7 " + badge, font=font(SANS_B, 9)))
+        assert w <= 470, f"ALSO {n} too long: {line}"
+    # numbers strip labels fit their cell
     for _num, lab, _n in NUMBERS:
-        assert len(wrap(d, lab, font(SANS, 11), (W - 44) / 6 - 12)) == 1, \
-            f"numbers label wraps: {lab}"
+        assert d.textlength(lab, font=font(SANS, 10)) <= 152, \
+            f"numbers label too long: {lab}"
+    dc = wrap(d, DATE_CHECK, font(SANS_B, 11), 960)
+    assert len(dc) <= 2, f"DATE CHECK needs {len(dc)} lines"
+    assert d.textlength(LEGEND, font=font(SANS, 9)) <= 984, "legend too long"
+    # map pins: every pair of label circles at least 17px apart
+    def proj(lon, lat):
+        return (510 + (lon + 180) / 360 * 494,
+                742 + (90 - lat) / 150 * 216)
+    centres = []
+    for _n, lon, lat, dx, dy in PINS:
+        px, py = proj(lon, lat)
+        centres.append((px + dx, py + dy))
+    for i in range(len(centres)):
+        for j in range(i + 1, len(centres)):
+            dx = centres[i][0] - centres[j][0]
+            dy = centres[i][1] - centres[j][1]
+            assert dx * dx + dy * dy >= 17 * 17, \
+                f"pins {PINS[i][0]} and {PINS[j][0]} too close"
 
 
 def main():
     img = Image.new("RGB", (W, H), PAPER)
     d = ImageDraw.Draw(img)
-    MX = 22
+    MX = 20
 
     # sanity: 35 stories, region counts computed from the tags
     all_stories = list(LEADS) + list(SECONDARIES) + [
@@ -397,199 +486,154 @@ def main():
 
     fit_check(d)
 
-    # ---------------- masthead ----------------
+    # ---- red top rule + masthead --------------------------------------
     d.rectangle([0, 0, W, 6], fill=RED)
-    f_title = font(SERIF, 46)
     title = "THE MONDAY GLOBE"
-    tw = d.textlength(title, font=f_title)
-    d.text(((W - tw) / 2, 14), title, font=f_title, fill=INK)
-    f_date = font(SERIF, 40)
-    date = "MONDAY 23 NOVEMBER 2026"
-    tw = d.textlength(date, font=f_date)
-    d.text(((W - tw) / 2, 64), date, font=f_date, fill=RED)
-    f_sub = font(SANS, 13)
-    sub = ("35 STORIES FROM ONE DAY  \u00b7  VERIFIED FROM LIVE REPORTS  "
-           "\u00b7  ANTALYA \u00b7 BENGHAZI \u00b7 SANTA CLARA \u00b7 JAKARTA")
-    tw = d.textlength(sub, font=f_sub)
-    d.text(((W - tw) / 2, 110), sub, font=f_sub, fill=GREY)
-    d.line([MX, 130, W - MX, 130], fill=INK, width=2)
-    d.line([MX, 134, W - MX, 134], fill=INK, width=1)
+    f_title = font(SERIF, 50)
+    d.text((W / 2, 14), title, font=f_title, fill=INK, anchor="ma")
+    d.line([MX, 68, W - MX, 68], fill=INK, width=2)
+    d.line([MX, 72, W - MX, 72], fill=INK, width=1)
 
-    # ---------------- numbers strip ----------------
-    y0, y1 = 142, 192
+    # ---- red date band -------------------------------------------------
+    d.rectangle([MX, 76, W - MX, 104], fill=RED)
+    d.text((MX + 12, 90), "MONDAY 23 NOVEMBER 2026", font=font(SANS_B, 20),
+           fill=(255, 255, 255), anchor="lm")
+    d.text((W - MX - 12, 90), "SECOND EDITION \u00b7 35 STORIES",
+           font=font(SANS_B, 12), fill=(255, 255, 255), anchor="rm")
+
+    # ---- dark navy numbers strip ---------------------------------------
+    d.rectangle([MX, 110, W - MX, 162], fill=NAVY)
     cell_w = (W - 2 * MX) / 6
-    f_num = font(SANS_B, 26)
-    f_lab = font(SANS, 11)
-    for i, (num, lab, story_n) in enumerate(NUMBERS):
-        x = MX + i * cell_w
+    for i, (num, lab, _n) in enumerate(NUMBERS):
+        cx = MX + cell_w * (i + 0.5)
         if i:
-            d.line([x, y0 + 4, x, y1 - 4], fill=GREY, width=1)
-        tw = d.textlength(num, font=f_num)
-        d.text((x + (cell_w - tw) / 2, y0 + 2), num, font=f_num, fill=RED)
-        lines = wrap(d, lab, f_lab, cell_w - 12)
-        yy = y0 + 32
-        for ln in lines:
-            tw = d.textlength(ln, font=f_lab)
-            d.text((x + (cell_w - tw) / 2, yy), ln, font=f_lab, fill=INK)
-            yy += 13
-    d.line([MX, y1, W - MX, y1], fill=INK, width=1)
+            d.line([MX + cell_w * i, 114, MX + cell_w * i, 158],
+                   fill=(70, 90, 120), width=1)
+        d.text((cx, 126), num, font=font(SANS_B, 26),
+               fill=(255, 255, 255), anchor="mm")
+        d.text((cx, 148), lab, font=font(SANS, 10), fill=GOLD, anchor="mm")
 
-    # ---------------- region bar (counts computed above) ----------------
-    y0 = 198
-    total = sum(c for _, c in regions)
+    # ---- region bar ------------------------------------------------------
     x = MX
-    bar_w = W - 2 * MX
-    f_reg = font(SANS_B, 11)
-    for (name, cnt), col in zip(regions, REGION_COLS):
-        seg = bar_w * cnt / total
-        d.rectangle([x, y0, x + seg - 1, y0 + 20], fill=col)
-        label = f"{REGION_SHORT.get(name, name)} {cnt}"
-        tw = d.textlength(label, font=f_reg)
-        d.text((x + (seg - tw) / 2, y0 + 4), label, font=f_reg,
-               fill=(255, 255, 255))
+    total_w = W - 2 * MX
+    for (name, count), col in zip(regions, REGION_COLS):
+        seg = total_w * count / 35
+        d.rectangle([x, 166, x + seg, 186], fill=col)
+        label = f"{REGION_SHORT.get(name, name)} {count}"
+        d.text((x + seg / 2, 176), label, font=font(SANS_B, 11),
+               fill=(255, 255, 255), anchor="mm")
         x += seg
-    d.text((MX, y0 + 24),
-           "WHERE THE NEWS CAME FROM \u2014 35 STORIES, 6 REGIONS",
-           font=font(SANS_B, 10), fill=GREY)
 
-    # ---------------- leads: 2 x 2 ----------------
-    lead_y, lead_h, gap = 236, 124, 6
-    lead_w = (W - 2 * MX - gap) / 2
-    f_tag = font(SANS_B, 10)
-    f_lead_t = font(SANS_B, 17)
-    f_lead_b = font(SANS, 12)
-    f_src = font(SANS, 10)
+    # ---- four leads in one row ------------------------------------------
+    col_w, gap = 240, 8
     for i, st in enumerate(LEADS):
-        x = MX + (i % 2) * (lead_w + gap)
-        y = lead_y + (i // 2) * (lead_h + gap)
-        d.rectangle([x, y, x + lead_w, y + lead_h], fill=PANEL,
-                    outline=INK, width=1)
-        iw = 128
-        d.rectangle([x + 1, y + 1, x + iw, y + lead_h - 1], fill=st["tint"])
-        draw_icon(d, st["kind"], x + iw / 2, y + lead_h / 2 - 4, 34,
-                  PAPER, (255, 220, 120))
-        badge_circle(d, x + 6, y + 6, st["n"])
-        tx = x + iw + 10
-        tw_ = lead_w - iw - 20
-        d.text((tx, y + 7), st["tag"], font=f_tag, fill=RED)
-        # verification pill, top-right of the panel
-        fill = BADGE_FILL[st["badge"]]
-        f_pill = font(SANS_B, 9)
-        pw = d.textlength(st["badge"], font=f_pill) + 14
-        badge_pill(d, x + lead_w - pw - 8, y + 6, st["badge"], fill)
-        yy = y + 23
-        for ln in wrap(d, st["title"], f_lead_t, tw_):
-            d.text((tx, yy), ln, font=f_lead_t, fill=INK)
-            yy += 20
-        for ln in wrap(d, st["body"], f_lead_b, tw_):
-            d.text((tx, yy), ln, font=f_lead_b, fill=INK)
-            yy += 14
-        d.text((tx, y + lead_h - 16), "Source: " + st["src"], font=f_src,
+        x0 = MX + i * (col_w + gap)
+        # poster art panel on top, text below
+        draw_lead_art(d, st["kind"], x0, 192, col_w, 106,
+                      st["tint"], st["deep"])
+        num_circle(d, x0 - 2, 190, st["n"], diam=30)
+        # tag + verification pill
+        d.text((x0, 306), f"{st['tag']} \u00b7 {st['region']}",
+               font=font(SANS_B, 10), fill=RED)
+        pw = pill_width(d, st["badge"])
+        badge_pill(d, x0 + col_w - pw, 302, st["badge"],
+                   BADGE_FILL[st["badge"]])
+        # title (up to 2 lines), body (up to 5), source
+        y = 322
+        for line in wrap(d, st["title"], font(SANS_B, 15), col_w):
+            d.text((x0, y), line, font=font(SANS_B, 15), fill=INK)
+            y += 19
+        y = 362
+        for line in wrap(d, st["body"], font(SANS, 10), col_w):
+            d.text((x0, y), line, font=font(SANS, 10), fill=INK)
+            y += 13
+        d.text((x0, 430), "Source: " + st["src"], font=font(SANS, 10),
                fill=GREY)
+        d.line([x0, 448, x0 + col_w, 448], fill=(200, 195, 180), width=1)
 
-    # ---------------- secondaries: 2 cols x 5 rows ----------------
-    sec_y, sec_h, sec_gap = 496, 40, 4
-    sec_w = (W - 2 * MX - gap) / 2
-    f_sec_t = font(SANS_B, 13)
-    f_sec_b = font(SANS, 11)
+    # ---- secondaries header ----------------------------------------------
+    d.text((MX, 456), "MORE FROM MONDAY", font=font(SANS_B, 14), fill=INK)
+    d.text((W - MX, 460), "10 MORE STORIES \u00b7 \u2116 5\u201314",
+           font=font(SANS, 10), fill=GREY, anchor="ra")
+    d.line([MX, 474, W - MX, 474], fill=INK, width=1)
+
+    # ---- secondaries: two columns of five --------------------------------
     for i, st in enumerate(SECONDARIES):
-        x = MX + (i % 2) * (sec_w + gap)
-        y = sec_y + (i // 2) * (sec_h + sec_gap)
-        d.rectangle([x, y, x + sec_w, y + sec_h], fill=PANEL, outline=GREY,
-                    width=1)
-        draw_icon(d, st["kind"], x + 22, y + sec_h / 2, 13, INK, RED)
-        badge_circle(d, x + 44, y + 8, st["n"], diam=24)
-        tx = x + 76
-        tw_ = sec_w - 86
-        # title line: number + title + tag, then coloured badge word
-        head = f"{st['n']}. {st['title']}  \u2014  {st['tag']}  \u00b7  "
-        d.text((tx, y + 2), head, font=f_sec_t, fill=INK)
-        hw = d.textlength(head, font=f_sec_t)
-        d.text((tx + hw, y + 2), st["badge"], font=f_sec_t,
-               fill=BADGE_FILL[st["badge"]])
-        # body, 2 lines max, with the source appended to the last line
+        col, row = divmod(i, 5)
+        x0 = MX + col * 496
+        y0 = 478 + row * 48
+        draw_mini(d, st["kind"], x0, y0 + 4, 36,
+                  KIND_TINT[st["kind"]], KIND_DEEP[st["kind"]])
+        num_circle(d, x0 + 24, y0 + 26, st["n"], diam=22)
+        tx = x0 + 56
+        title = f"{st['n']}. {st['title']} \u2014 {st['tag']}"
+        d.text((tx, y0 + 2), title, font=font(SANS_B, 12), fill=INK)
+        pw = pill_width(d, st["badge"])
+        badge_pill(d, x0 + 488 - pw, y0 + 2, st["badge"],
+                   BADGE_FILL[st["badge"]])
+        lines = wrap(d, st["body"], font(SANS, 11), 432)
         suffix = " \u2014 " + st["src"]
-        lines = wrap(d, st["body"], f_sec_b, tw_)
-        # trim the last line so the source fits on it
-        while (d.textlength(lines[-1] + suffix, font=f_sec_b) > tw_
-               and len(lines[-1]) > 10):
-            lines[-1] = lines[-1][:-1]
-        lines[-1] = lines[-1].rstrip(" ,.;")
-        yy = y + 19
-        for j, ln in enumerate(lines):
-            d.text((tx, yy), ln, font=f_sec_b, fill=(60, 56, 48))
-            if j == len(lines) - 1:
-                sw = d.textlength(ln, font=f_sec_b)
-                d.text((tx + sw, yy), suffix, font=f_sec_b, fill=GREY)
-            yy += 11
+        for li, line in enumerate(lines):
+            yy = y0 + 19 + li * 14
+            if li == len(lines) - 1:
+                d.text((tx, yy), line, font=font(SANS, 11), fill=INK)
+                sw = d.textlength(line, font=font(SANS, 11))
+                d.text((tx + sw, yy), suffix, font=font(SANS, 11), fill=GREY)
+            else:
+                d.text((tx, yy), line, font=font(SANS, 11), fill=INK)
 
-    # ---------------- bottom band: map + ALSO ----------------
-    bot_y, bot_h = 720, 240
-    map_w = 600
-    d.rectangle([MX, bot_y, MX + map_w, bot_y + bot_h], fill=PANEL,
-                outline=INK, width=1)
-    d.text((MX + 10, bot_y + 6), "WHERE IT HAPPENED",
-           font=font(SANS_B, 13), fill=RED)
-    d.text((MX + 10, bot_y + 24), "Numbered pins match the stories above",
-           font=font(SANS, 10), fill=GREY)
-    mx0, my0 = MX + 14, bot_y + 44
-    mw, mh = map_w - 28, bot_h - 56
-    cw, ch = mw / 64, mh / 24
+    # ---- bottom split: ALSO (left) / map (right) -------------------------
+    d.text((MX, 722), "ALSO ON MONDAY", font=font(SANS_B, 14), fill=RED)
+    d.text((510, 722), "WHERE IT HAPPENED", font=font(SANS_B, 14), fill=RED)
+    d.text((W - MX, 726), "pins match the stories above",
+           font=font(SANS, 9), fill=GREY, anchor="ra")
+    d.line([MX, 740, 496, 740], fill=INK, width=1)
+    d.line([510, 740, W - MX, 740], fill=INK, width=1)
+
+    for i, (n, item, _r, badge) in enumerate(ALSO):
+        y = 744 + i * 10.3
+        d.text((MX, y), f"{n}. {item}", font=font(SANS, 10), fill=INK)
+        tw = d.textlength(f"{n}. {item}", font=font(SANS, 10))
+        d.text((MX + tw, y), " \u00b7 " + badge, font=font(SANS_B, 9),
+               fill=BADGE_FILL[badge])
+
+    # dotted world map
+    map_x, map_y, map_w, map_h = 510, 744, 494, 214
+    cw, ch = map_w / 64, map_h / 24
     for r, spans in enumerate(MAP_ROWS):
         for c0, c1 in spans:
             for c in range(c0, c1 + 1):
-                d.ellipse([mx0 + c * cw + 1, my0 + r * ch + 1,
-                           mx0 + (c + 1) * cw - 1, my0 + (r + 1) * ch - 1],
-                          fill=(150, 160, 140))
-    f_pin = font(SANS_B, 10)
+                px = map_x + (c + 0.5) * cw
+                py = map_y + (r + 0.5) * ch
+                d.ellipse([px - 2.2, py - 2.2, px + 2.2, py + 2.2], fill=DOT)
+
+    def proj(lon, lat):
+        return (map_x + (lon + 180) / 360 * map_w,
+                map_y + (90 - lat) / 150 * map_h)
+
     for n, lon, lat, dx, dy in PINS:
-        px = mx0 + (lon + 180) / 360 * mw
-        py = my0 + (90 - lat) / 150 * mh
+        px, py = proj(lon, lat)
         cx, cy = px + dx, py + dy
         if dx or dy:
-            d.line([px, py, cx, cy], fill=GREY, width=1)
-            d.ellipse([px - 2, py - 2, px + 2, py + 2], fill=RED)
-        d.ellipse([cx - 9, cy - 9, cx + 9, cy + 9], fill=RED,
+            d.line([px, py, cx, cy], fill=RED, width=1)
+        d.ellipse([cx - 8, cy - 8, cx + 8, cy + 8], fill=RED,
                   outline=(255, 255, 255), width=1)
+        f = font(SANS_B, 9)
         t = str(n)
-        tw = d.textlength(t, font=f_pin)
-        d.text((cx - tw / 2, cy - 7), t, font=f_pin, fill=(255, 255, 255))
+        tw = d.textlength(t, font=f)
+        d.text((cx - tw / 2, cy - 5), t, font=f, fill=(255, 255, 255))
 
-    # ALSO list
-    ax = MX + map_w + 12
-    aw = W - MX - ax
-    d.rectangle([ax, bot_y, ax + aw, bot_y + bot_h], fill=PANEL,
-                outline=INK, width=1)
-    d.text((ax + 10, bot_y + 6), "ALSO ON MONDAY",
-           font=font(SANS_B, 13), fill=RED)
-    d.line([ax + 10, bot_y + 26, ax + aw - 10, bot_y + 26], fill=GREY, width=1)
-    f_also = font(SANS, 10)
-    f_also_b = font(SANS_B, 9)
-    yy = bot_y + 28
-    for n, item, _r, badge in ALSO:
-        line = f"{n}. {item}"
-        d.text((ax + 10, yy), line, font=f_also, fill=INK)
-        bw = d.textlength(line, font=f_also)
-        d.text((ax + 10 + bw, yy), " \u00b7 " + badge, font=f_also_b,
-               fill=BADGE_FILL[badge])
-        yy += 10
+    # ---- DATE CHECK box ----------------------------------------------------
+    d.rectangle([MX, 964, W - MX, 994], outline=RED, width=2, fill=PANEL)
+    dc_lines = wrap(d, DATE_CHECK, font(SANS_B, 11), 960)
+    for i, line in enumerate(dc_lines):
+        d.text((MX + 12, 968 + i * 14), line, font=font(SANS_B, 11), fill=INK)
 
-    # ---------------- DATE CHECK footer ----------------
-    fy = bot_y + bot_h + 8
-    d.rectangle([MX, fy, W - MX, fy + 30], fill=(232, 222, 200), outline=RED,
-                width=1)
-    f_dc = font(SANS_B, 11)
-    lines = wrap(d, DATE_CHECK, f_dc, W - 2 * MX - 20)
-    yy = fy + 3
-    for ln in lines:
-        d.text((MX + 10, yy), ln, font=f_dc, fill=INK)
-        yy += 13
+    # ---- footer legend ------------------------------------------------------
+    d.text((W / 2, 1000), LEGEND, font=font(SANS, 9), fill=GREY, anchor="ma")
 
-    # ---------------- HOW WE CHECKED legend ----------------
-    d.text((MX, fy + 34), LEGEND, font=font(SANS, 9), fill=GREY)
-
-    img.save(OUT, format="PNG", optimize=True)
-    print(f"wrote {OUT} {os.path.getsize(OUT)} bytes")
+    img.save(OUT)
+    print("wrote", OUT)
 
 
 if __name__ == "__main__":
